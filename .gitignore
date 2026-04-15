@@ -2,6 +2,10 @@
 .env
 .env.*
 
+# Image tool folders
+process-images/process_images_input/
+process-images/process_images_output/
+
 # OS
 .DS_Store
 
