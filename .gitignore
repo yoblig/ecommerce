@@ -5,6 +5,8 @@
 # Image tool folders
 process_images/process_images_input/
 process_images/process_images_output/
+process_images/*.xlsx
+process_images/*.csv
 
 # Buyer assortment input/output files
 process_buyer_assortments/*.xlsx

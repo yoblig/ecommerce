@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 from PIL import Image
 import numpy as np
 
@@ -79,6 +80,8 @@ def process_images(input_folder, output_folder="process_images_output", toleranc
     for filename in os.listdir(input_folder):
         if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
             continue
+        if '_media' not in filename.lower():
+            continue
 
         input_path = os.path.join(input_folder, filename)
         base_name = os.path.splitext(filename)[0]
@@ -91,6 +94,16 @@ def process_images(input_folder, output_folder="process_images_output", toleranc
         print(f"✅ Saved: {output_path}")
 
     print("🎉 All images cropped, framed, resized, and exported as JPGs!")
+
+    # Copy log to output folder, then remove all images from input folder
+    log_path = os.path.join(input_folder, 'rename_log.csv')
+    if os.path.exists(log_path):
+        shutil.copy(log_path, os.path.join(output_folder, 'rename_log.csv'))
+
+    for filename in os.listdir(input_folder):
+        os.remove(os.path.join(input_folder, filename))
+
+    print("🗑️  Input images removed. Log copied to output folder.")
 
 frame_ratio = float(sys.argv[1]) if len(sys.argv) > 1 else 0.08
 process_images("./process_images_input", frame_ratio=frame_ratio)
