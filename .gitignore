@@ -3,8 +3,12 @@
 .env.*
 
 # Image tool folders
-process-images/process_images_input/
-process-images/process_images_output/
+process_images/process_images_input/
+process_images/process_images_output/
+
+# Buyer assortment input/output files
+process_buyer_assortments/*.xlsx
+process_buyer_assortments/*.csv
 
 # OS
 .DS_Store
