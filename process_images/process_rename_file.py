@@ -154,14 +154,14 @@ def rename_images(folder_path, buyer_xlsx, assortment_csv, original_map):
 if __name__ == "__main__":
     folder_path = './process_images_input'
 
-    # Auto-detect files
-    buyer_files = [f for f in glob.glob("*.xlsx") if 'buyer' in f.lower() and not os.path.basename(f).startswith("~$")]
-    assortment_files = [f for f in glob.glob("*.csv") if 'assortment' in f.lower()]
+    # Auto-detect files inside the input folder
+    buyer_files = [f for f in glob.glob(os.path.join(folder_path, "*.xlsx")) if 'buyer' in f.lower() and not os.path.basename(f).startswith("~$")]
+    assortment_files = [f for f in glob.glob(os.path.join(folder_path, "*.csv")) if 'assortment' in f.lower()]
 
     if not buyer_files:
-        raise FileNotFoundError("No buyer XLSX file found in the current directory.")
+        raise FileNotFoundError("No buyer XLSX file found in process_images_input/.")
     if not assortment_files:
-        raise FileNotFoundError("No assortment CSV file found in the current directory.")
+        raise FileNotFoundError("No assortment CSV file found in process_images_input/.")
 
     print(f"Buyer XLSX: {buyer_files[0]}")
     print(f"Assortment CSV: {assortment_files[0]}")
