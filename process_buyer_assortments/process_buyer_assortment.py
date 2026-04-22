@@ -3,7 +3,7 @@ import glob
 import os
 
 # Auto-detect Excel file
-xlsx_files = glob.glob("*.xlsx")
+xlsx_files = [f for f in glob.glob("*.xlsx") if not os.path.basename(f).startswith("~$")]
 if not xlsx_files:
     raise FileNotFoundError("No .xlsx file found in the current directory.")
 
@@ -28,14 +28,17 @@ if header_row is not None:
     # Find relevant columns
     desc_col = next((c for c in df.columns if c in ['BOOKSTORE DESCRIPTION', 'NETSUITE DESCRIPTION', 'DESCRIPTION']), None)
     style_col = next((c for c in df.columns if 'VENDOR STYLE #' in str(c)), None)
-    if desc_col and style_col:
-        cleaned = df[[desc_col, style_col]].dropna(how='all').copy()
-        cleaned.columns = ['ITEM_NAME', 'VENDOR_STYLE']
-        cleaned = cleaned.dropna().reset_index(drop=True)
-        cleaned['VENDOR_STYLE'] = cleaned['VENDOR_STYLE'].astype(str).str.strip()
+    if desc_col:
+        cols = [desc_col] + ([style_col] if style_col else [])
+        cleaned = df[cols].dropna(how='all').copy()
+        col_names = ['ITEM_NAME'] + (['VENDOR_STYLE'] if style_col else [])
+        cleaned.columns = col_names
+        cleaned = cleaned.dropna(subset=['ITEM_NAME']).reset_index(drop=True)
+        if style_col:
+            cleaned['VENDOR_STYLE'] = cleaned['VENDOR_STYLE'].astype(str).str.strip()
         cleaned.to_csv(output_csv, index=False)
         print(f"✅ Saved cleaned data to: {output_csv}")
     else:
-        print("❌ One or more required columns not found.")
+        print("❌ Description column not found.")
 else:
     print("❌ Header row not found.")
