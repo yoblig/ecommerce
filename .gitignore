@@ -12,6 +12,9 @@ process_images/*.csv
 process_buyer_assortments/*.xlsx
 process_buyer_assortments/*.csv
 
+# Category sort input/output files
+process_category_sort/*.csv
+
 # OS
 .DS_Store
 
