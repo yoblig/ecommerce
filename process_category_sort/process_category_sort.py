@@ -19,7 +19,7 @@ downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
 output_file_path = os.path.join(downloads_folder, f"Python - {base_name} - Category.csv")
 
 # ── Read input ───────────────────────────────────────────────────────────────
-df = pd.read_csv(file_path)
+df = pd.read_csv(file_path, encoding="latin-1")
 if "ITEM_NAME" not in df.columns:
     raise ValueError("Expected an 'ITEM_NAME' column in the CSV.")
 
@@ -105,7 +105,7 @@ sweatshirts = ("HOOD", "CREW", "SWEATSHIRT", "SWEATER", "CARDIGAN", "HOODIE",
 hats        = ("HAT", "ADJUSTABLE HAT", "BEANIE", "FITTED HAT", "TRUCKER HAT",
                "TRCKR HAT", "SNAPBACK", "SNAP BACK", " CAP")
 loungewear  = ("PAJAMA", "PAJAMAS")
-tops        = ("TEE", "T-SHIRT", "TSHIRT", "TANK", "VNECK", "V-NECK")
+tops        = ("TEE", "T-SHIRT", "TSHIRT", "TANK", "VNECK", "V-NECK", "LONG SLEEVE")
 
 # ── Categorize ───────────────────────────────────────────────────────────────
 assortment_sorted = []
