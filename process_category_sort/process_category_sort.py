@@ -19,7 +19,7 @@ downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
 output_file_path = os.path.join(downloads_folder, f"Python - {base_name} - Category.csv")
 
 # ── Read input ───────────────────────────────────────────────────────────────
-df = pd.read_csv(file_path, encoding="latin-1")
+df = pd.read_csv(file_path, encoding="utf-8-sig")
 if "ITEM_NAME" not in df.columns:
     raise ValueError("Expected an 'ITEM_NAME' column in the CSV.")
 
@@ -78,6 +78,7 @@ brands = {
     "HYPE & VICE":      {"name": "HYPE & VICE",       "id": 0,   "men": 0,   "women": 183},
     "LEAGUE":           {"name": "LEAGUE",            "id": 0,   "men": 83,  "women": 0},
     "LULULEMON":        {"name": "LULULEMON",         "id": 319, "men": 320, "women": 321},
+    "NEW ERA":          {"name": "NEW ERA",           "id": 349, "men": 0,   "women": 0},
     "NIKE":             {"name": "NIKE",              "id": 298, "men": 46,  "women": 79},
     "OURAY":            {"name": "OURAY",             "id": 299, "men": 48,  "women": 82},
     "REYN SPOONER":     {"name": "REYN SPOONER",      "id": 286, "men": 0,   "women": 0},
