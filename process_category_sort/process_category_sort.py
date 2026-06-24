@@ -19,7 +19,7 @@ downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
 output_file_path = os.path.join(downloads_folder, f"Python - {base_name} - Category.csv")
 
 # ── Read input ───────────────────────────────────────────────────────────────
-df = pd.read_csv(file_path, encoding="latin-1")
+df = pd.read_csv(file_path, encoding="utf-8-sig")
 if "ITEM_NAME" not in df.columns:
     raise ValueError("Expected an 'ITEM_NAME' column in the CSV.")
 
