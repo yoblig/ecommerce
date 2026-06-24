@@ -79,6 +79,7 @@ brands = {
     "LEAGUE":           {"name": "LEAGUE",            "id": 0,   "men": 83,  "women": 0},
     "LULULEMON":        {"name": "LULULEMON",         "id": 319, "men": 320, "women": 321},
     "NEW ERA":          {"name": "NEW ERA",           "id": 349, "men": 0,   "women": 0},
+    "PONYFLO":          {"name": "PONYFLO",           "id": 0,   "men": 0,   "women": 0},
     "NIKE":             {"name": "NIKE",              "id": 298, "men": 46,  "women": 79},
     "OURAY":            {"name": "OURAY",             "id": 299, "men": 48,  "women": 82},
     "REYN SPOONER":     {"name": "REYN SPOONER",      "id": 286, "men": 0,   "women": 0},
@@ -133,7 +134,9 @@ for item in items:
 
     # Gender
     categorized_gender = ""
-    if "WOMEN" in item and not categorized_kid:
+    if "PONYFLO" in item:
+        categorized_gender = "ponyflo"
+    elif "WOMEN" in item and not categorized_kid:
         categorized_gender = "women"
     elif not categorized_kid:
         categorized_gender = "men"
@@ -215,6 +218,11 @@ for item in items:
                 assortment_sorted.append([brand["name"] + " MEN", str(brand["men"]), item])
             if categorized_gender == "women" and brand["women"]:
                 assortment_sorted.append([brand["name"] + " WOMEN", str(brand["women"]), item])
+
+    # PONYFLO — always Womens Hats
+    if "PONYFLO" in item:
+        assortment_sorted.append(["WOMENS HATS", "143", item])
+        matched_product_type = True
 
     # ARIZONA SPORTS — keyword-based
     for sport in arizona_sports.values():
