@@ -96,7 +96,7 @@ arizona_sports = {
     "SOCCER":      {"name": "SOCCER",      "id": 348},
 }
 
-bottoms     = ("SHORTS", "PANT", "SKIRT", "SKORT", "JOGGER", "JOGGERS", "SWEATPANT", "SWEATPANTS")
+bottoms     = ("SHORTS", "SHORT", "PANT", "SKIRT", "SKORT", "JOGGER", "JOGGERS", "SWEATPANT", "SWEATPANTS")
 outerwears  = ("JACKET", "COAT", "BOMBER", "WINDBREAKER")
 polos       = ("POLO", "COLLAR")
 sweatshirts = ("HOOD", "CREW", "SWEATSHIRT", "SWEATER", "CARDIGAN", "HOODIE",
@@ -105,7 +105,7 @@ sweatshirts = ("HOOD", "CREW", "SWEATSHIRT", "SWEATER", "CARDIGAN", "HOODIE",
 hats        = ("HAT", "ADJUSTABLE HAT", "BEANIE", "FITTED HAT", "TRUCKER HAT",
                "TRCKR HAT", "SNAPBACK", "SNAP BACK", " CAP")
 loungewear  = ("PAJAMA", "PAJAMAS")
-tops        = ("TEE", "T-SHIRT", "TSHIRT", "TANK", "VNECK", "V-NECK", "LONG SLEEVE")
+tops        = ("TEE", "T-SHIRT", "TSHIRT", "TANK", "VNECK", "V-NECK", "SHORT SLEEVE", "LONG SLEEVE")
 
 # ── Categorize ───────────────────────────────────────────────────────────────
 assortment_sorted = []
@@ -138,7 +138,7 @@ for item in items:
         categorized_gender = "men"
 
     # Product type detection
-    is_bottom     = any(k in item for k in bottoms)
+    is_bottom     = any(k in item for k in bottoms) and "SHORT SLEEVE" not in item
     is_outerwear  = any(k in item for k in outerwears)
     is_polo       = any(k in item for k in polos)
     is_sweatshirt = any(k in item for k in sweatshirts)
