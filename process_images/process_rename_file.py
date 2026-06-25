@@ -53,11 +53,17 @@ def rename_images(folder_path, buyer_xlsx, assortment_csv, original_map):
         buyer_df['ITEM_NAME'].astype(str).str.strip()
     ))
 
-    # Load assortment CSV: ITEM_NAME + DATA_WEB_IMAGE_URL (other columns ignored)
-    assortment_df = pd.read_csv(assortment_csv, usecols=['ITEM_NAME', 'DATA_WEB_IMAGE_URL'])
+    # Load assortment CSV: ITEM_NAME + DATA_WEB_IMAGE_URL (fall back to WEB_IMAGE_URL)
+    assortment_df = pd.read_csv(assortment_csv)
+    if 'DATA_WEB_IMAGE_URL' in assortment_df.columns:
+        url_col = 'DATA_WEB_IMAGE_URL'
+    elif 'WEB_IMAGE_URL' in assortment_df.columns:
+        url_col = 'WEB_IMAGE_URL'
+    else:
+        raise ValueError("Assortment CSV must have a 'DATA_WEB_IMAGE_URL' or 'WEB_IMAGE_URL' column.")
     item_to_url = dict(zip(
         assortment_df['ITEM_NAME'].astype(str).str.strip(),
-        assortment_df['DATA_WEB_IMAGE_URL'].astype(str).str.strip()
+        assortment_df[url_col].astype(str).str.strip()
     ))
 
     used_names = {}
@@ -77,19 +83,31 @@ def rename_images(folder_path, buyer_xlsx, assortment_csv, original_map):
                 matched_key = vendor_key
                 break
 
-        if not matched_key:
-            print(f"⚠️  No vendor match: {filename}")
-            log.append({
-                'STATUS': 'No vendor match',
-                'ITEM_NAME': '',
-                'VENDOR_STYLE': '',
-                'ORIGINAL_FILENAME': original_filename,
-                'NEW_FILENAME': ''
-            })
-            continue
+        if matched_key:
+            item_name = vendor_to_item[matched_key]
+            original_vendor_style = vendor_normalized_to_original[matched_key]
+        else:
+            # Fallback: match normalized filename against normalized ITEM_NAME
+            filename_normalized = re.sub(r'[- _]', '', os.path.splitext(filename)[0]).lower()
+            item_name = None
+            for name in item_to_url:
+                name_normalized = re.sub(r'[- _]', '', name).lower()
+                if name_normalized in filename_normalized:
+                    item_name = name
+                    break
 
-        item_name = vendor_to_item[matched_key]
-        original_vendor_style = vendor_normalized_to_original[matched_key]
+            if not item_name:
+                print(f"⚠️  No vendor or item name match: {filename}")
+                log.append({
+                    'STATUS': 'No vendor match',
+                    'ITEM_NAME': '',
+                    'VENDOR_STYLE': '',
+                    'ORIGINAL_FILENAME': original_filename,
+                    'NEW_FILENAME': ''
+                })
+                continue
+
+            original_vendor_style = ''
 
         # Look up DATA_WEB_IMAGE_URL using ITEM_NAME
         web_image_url = item_to_url.get(item_name)
