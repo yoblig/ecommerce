@@ -15,8 +15,7 @@ print(f"📋 Processing: {file_path}")
 base_name = os.path.splitext(os.path.basename(file_path))[0]
 if base_name.endswith(" - Buyer"):
     base_name = base_name[: -len(" - Buyer")]
-downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
-output_file_path = os.path.join(downloads_folder, f"Python - {base_name} - Category.csv")
+output_file_path = f"Python - {base_name} - Category.csv"
 
 # ── Read input ───────────────────────────────────────────────────────────────
 df = pd.read_csv(file_path, encoding="utf-8-sig")
@@ -84,6 +83,7 @@ brands = {
     "OURAY":            {"name": "OURAY",             "id": 299, "men": 48,  "women": 82},
     "REYN SPOONER":     {"name": "REYN SPOONER",      "id": 286, "men": 0,   "women": 0},
     "USCAPE":           {"name": "USCAPE",            "id": 292, "men": 0,   "women": 0},
+    "VANTAGE":          {"name": "VANTAGE",           "id": 0,   "men": 0,   "women": 0},
     "WRANGLER":         {"name": "WRANGLER",          "id": 294, "men": 0,   "women": 0},
     "ZEPHYR":           {"name": "ZEPHYR",            "id": 0,   "men": 47,  "women": 80},
     "ZOOZATZ":          {"name": "ZOOZATZ",           "id": 297, "men": 0,   "women": 209},
@@ -116,39 +116,48 @@ unmatched_items = []
 for item in items:
     matched_brand = False
     matched_product_type = False
+    item_upper = item.upper()
 
     # Age groups
     categorized_kid = False
-    if "YOUTH" in item:
+    if "YOUTH" in item_upper:
         assortment_sorted.append(["ALL KIDS", "225", item])
         assortment_sorted.append(["YOUTH", "70", item])
         categorized_kid = True
-    elif "TODDLER" in item:
+    elif "TODDLER" in item_upper:
         assortment_sorted.append(["ALL KIDS", "225", item])
         assortment_sorted.append(["TODDLER", "69", item])
         categorized_kid = True
-    elif "INFANT" in item:
+    elif "PRESCHOOL" in item_upper:
+        assortment_sorted.append(["ALL KIDS", "225", item])
+        assortment_sorted.append(["TODDLER", "69", item])
+        categorized_kid = True
+    elif "INFANT" in item_upper:
         assortment_sorted.append(["ALL KIDS", "225", item])
         assortment_sorted.append(["INFANT", "69", item])
         categorized_kid = True
 
     # Gender
+    womens_keywords = ("WOMEN", "MOM", "GRANDMA", "ABUELA")
+    mens_keywords   = ("DAD", "GRANDPA", "ABUELO")
     categorized_gender = ""
-    if "PONYFLO" in item:
+    if "PONYFLO" in item_upper:
         categorized_gender = "ponyflo"
-    elif "WOMEN" in item and not categorized_kid:
+    elif any(k in item_upper for k in womens_keywords) and not categorized_kid:
         categorized_gender = "women"
+    elif any(k in item_upper for k in mens_keywords) and not categorized_kid:
+        categorized_gender = "men"
     elif not categorized_kid:
         categorized_gender = "men"
 
     # Product type detection
-    is_bottom     = any(k in item for k in bottoms) and "SHORT SLEEVE" not in item
-    is_outerwear  = any(k in item for k in outerwears)
-    is_polo       = any(k in item for k in polos)
-    is_sweatshirt = any(k in item for k in sweatshirts)
-    is_hat        = any(k in item for k in hats)
-    is_loungewear = any(k in item for k in loungewear)
-    is_top        = any(k in item for k in tops)
+    is_bottom     = any(k in item_upper for k in bottoms) and "SHORT SLEEVE" not in item_upper
+    is_outerwear  = any(k in item_upper for k in outerwears)
+    is_polo       = any(k in item_upper for k in polos)
+    is_sweatshirt = any(k in item_upper for k in sweatshirts)
+    is_hat        = any(k in item_upper for k in hats)
+    is_loungewear = any(k in item_upper for k in loungewear)
+    is_top        = any(k in item_upper for k in tops)
     has_product_type = any([is_bottom, is_outerwear, is_polo, is_sweatshirt, is_hat, is_loungewear, is_top])
 
     # NEW ARRIVALS (every item)
@@ -210,7 +219,7 @@ for item in items:
 
     # BRANDS
     for brand in brands.values():
-        if brand["name"] in item:
+        if brand["name"] in item_upper:
             matched_brand = True
             if brand["id"]:
                 assortment_sorted.append([brand["name"], str(brand["id"]), item])
@@ -220,13 +229,13 @@ for item in items:
                 assortment_sorted.append([brand["name"] + " WOMEN", str(brand["women"]), item])
 
     # PONYFLO — always Womens Hats
-    if "PONYFLO" in item:
+    if "PONYFLO" in item_upper:
         assortment_sorted.append(["WOMENS HATS", "143", item])
         matched_product_type = True
 
     # ARIZONA SPORTS — keyword-based
     for sport in arizona_sports.values():
-        if sport["name"] in item:
+        if sport["name"] in item_upper:
             assortment_sorted.append([sport["name"] + " ARIZONA", str(sport["id"]), item])
 
     # ARIZONA SPORTS — assortment-level override
