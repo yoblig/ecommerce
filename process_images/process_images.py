@@ -78,7 +78,7 @@ def process_images(input_folder, output_folder="process_images_output", toleranc
         os.makedirs(output_folder)
 
     for filename in os.listdir(input_folder):
-        if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp')):
+        if not filename.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.jfif')):
             continue
         if '_media' not in filename.lower():
             continue
