@@ -65,6 +65,7 @@ if sport_input:
 
 # ── Category data ────────────────────────────────────────────────────────────
 brands = {
+    "47":               {"name": "47",                "id": 350, "men": 0,   "women": 0},
     "BLUE 84":          {"name": "BLUE 84",          "id": 0,   "men": 121, "women": 81},
     "CERTO":            {"name": "CERTO",             "id": 296, "men": 0,   "women": 0},
     "CHAMPION":         {"name": "CHAMPION",          "id": 291, "men": 120, "women": 154},
