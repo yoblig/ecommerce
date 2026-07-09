@@ -5,22 +5,21 @@ import glob
 
 IMAGE_EXTENSIONS = ('.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp')
 
-
-def normalize_filenames(folder):
-    """Strip dashes, spaces, and underscores from image filenames to simplify matching.
-    Returns a dict mapping normalized filename → original filename (before normalization)."""
-    original_map = {}
-    for file_name in os.listdir(folder):
-        if not file_name.lower().endswith(IMAGE_EXTENSIONS):
-            continue
-        new_file_name = re.sub(r'[- _]', '', file_name)
-        original_map[new_file_name] = file_name
-        if new_file_name != file_name:
-            os.rename(os.path.join(folder, file_name), os.path.join(folder, new_file_name))
-    return original_map
+FRACTION_ALIASES = [
+    (r'1/4', 'QUARTER'),
+    (r'1/2', 'HALF'),
+]
 
 
-def rename_images(folder_path, buyer_xlsx, assortment_csv, original_map):
+def normalize_text(text):
+    """Normalize text for matching: apply fraction aliases, strip separators, lowercase."""
+    text = text.upper()
+    for fraction, word in FRACTION_ALIASES:
+        text = text.replace(fraction, word)
+    return re.sub(r'[- _]', '', text).lower()
+
+
+def rename_images(folder_path, buyer_xlsx, assortment_csv):
     """Rename images using VENDOR_STYLE → ITEM_NAME → DATA_WEB_IMAGE_URL lookup."""
     # Load buyer XLSX: detect header row, then extract VENDOR STYLE # and description column
     df_raw = pd.read_excel(buyer_xlsx, header=None, engine='openpyxl')
@@ -45,11 +44,11 @@ def rename_images(folder_path, buyer_xlsx, assortment_csv, original_map):
 
     # Keep original vendor style (with dashes) for the log
     vendor_normalized_to_original = dict(zip(
-        buyer_df['VENDOR_STYLE'].str.lower().str.replace(r'[- _]', '', regex=True),
+        buyer_df['VENDOR_STYLE'].apply(normalize_text),
         buyer_df['VENDOR_STYLE']
     ))
     vendor_to_item = dict(zip(
-        buyer_df['VENDOR_STYLE'].str.lower().str.replace(r'[- _]', '', regex=True),
+        buyer_df['VENDOR_STYLE'].apply(normalize_text),
         buyer_df['ITEM_NAME'].astype(str).str.strip()
     ))
 
@@ -74,12 +73,11 @@ def rename_images(folder_path, buyer_xlsx, assortment_csv, original_map):
         if not os.path.isfile(file_path) or not filename.lower().endswith(IMAGE_EXTENSIONS):
             continue
 
-        original_filename = original_map.get(filename, filename)
-
         # Match normalized filename against normalized VENDOR_STYLE
         matched_key = None
+        filename_normalized = normalize_text(os.path.splitext(filename)[0])
         for vendor_key in vendor_to_item:
-            if vendor_key in filename.lower():
+            if vendor_key in filename_normalized:
                 matched_key = vendor_key
                 break
 
@@ -88,10 +86,9 @@ def rename_images(folder_path, buyer_xlsx, assortment_csv, original_map):
             original_vendor_style = vendor_normalized_to_original[matched_key]
         else:
             # Fallback: match normalized filename against normalized ITEM_NAME
-            filename_normalized = re.sub(r'[- _]', '', os.path.splitext(filename)[0]).lower()
             item_name = None
             for name in item_to_url:
-                name_normalized = re.sub(r'[- _]', '', name).lower()
+                name_normalized = normalize_text(name)
                 if name_normalized in filename_normalized:
                     item_name = name
                     break
@@ -102,7 +99,7 @@ def rename_images(folder_path, buyer_xlsx, assortment_csv, original_map):
                     'STATUS': 'No vendor match',
                     'ITEM_NAME': '',
                     'VENDOR_STYLE': '',
-                    'ORIGINAL_FILENAME': original_filename,
+                    'ORIGINAL_FILENAME': filename,
                     'NEW_FILENAME': ''
                 })
                 continue
@@ -117,7 +114,7 @@ def rename_images(folder_path, buyer_xlsx, assortment_csv, original_map):
                 'STATUS': 'No assortment match',
                 'ITEM_NAME': item_name,
                 'VENDOR_STYLE': original_vendor_style,
-                'ORIGINAL_FILENAME': original_filename,
+                'ORIGINAL_FILENAME': filename,
                 'NEW_FILENAME': ''
             })
             continue
@@ -144,7 +141,7 @@ def rename_images(folder_path, buyer_xlsx, assortment_csv, original_map):
             'STATUS': 'Renamed',
             'ITEM_NAME': item_name,
             'VENDOR_STYLE': original_vendor_style,
-            'ORIGINAL_FILENAME': original_filename,
+            'ORIGINAL_FILENAME': filename,
             'NEW_FILENAME': new_name
         })
 
@@ -184,5 +181,4 @@ if __name__ == "__main__":
     print(f"Buyer XLSX: {buyer_files[0]}")
     print(f"Assortment CSV: {assortment_files[0]}")
 
-    original_map = normalize_filenames(folder_path)
-    rename_images(folder_path, buyer_files[0], assortment_files[0], original_map)
+    rename_images(folder_path, buyer_files[0], assortment_files[0])
