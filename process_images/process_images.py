@@ -1,8 +1,30 @@
+import io
 import os
 import sys
 import shutil
-from PIL import Image
+from PIL import Image, ImageCms
 import numpy as np
+
+def apply_icc_profile(image):
+    """Convert image from its embedded ICC profile to sRGB, preserving appearance."""
+    icc = image.info.get('icc_profile')
+    if not icc:
+        return image
+    try:
+        src_profile = ImageCms.ImageCmsProfile(io.BytesIO(icc))
+        srgb_profile = ImageCms.createProfile('sRGB')
+        if image.mode == 'RGBA':
+            # Convert only the RGB channels, preserve alpha
+            r, g, b, a = image.split()
+            rgb = Image.merge('RGB', (r, g, b))
+            rgb = ImageCms.profileToProfile(rgb, src_profile, srgb_profile, outputMode='RGB')
+            rgb.putalpha(a)
+            return rgb
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+        return ImageCms.profileToProfile(image, src_profile, srgb_profile, outputMode='RGB')
+    except Exception:
+        return image
 
 def crop_and_frame(image, tolerance=245, frame_ratio=0.08):
     """
@@ -88,6 +110,7 @@ def process_images(input_folder, output_folder="process_images_output", toleranc
         output_path = os.path.join(output_folder, f"{base_name}.jpg")
 
         img = Image.open(input_path)
+        img = apply_icc_profile(img)
         framed = crop_and_frame(img, tolerance=tolerance, frame_ratio=frame_ratio)
         final = resize_and_center(framed)
         final.save(output_path, "JPEG", quality=80, optimize=True)
